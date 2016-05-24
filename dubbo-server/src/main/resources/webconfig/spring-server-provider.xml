@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+	<!-- 扫描注解包路径，多个包用逗号分隔，不填pacakge表示扫描当前ApplicationContext中所有的类 -->
+	<!-- <dubbo:annotation package="com.yang.dubbo" /> -->
+	
+	<!-- 提供方应用信息，用于计算依赖关系
+		日志：
+   			log4j
+			slf4j
+			jcl
+			jdk
+	 -->
+	<dubbo:application name="yang-server2" organization="yy" owner="yang" version="1.0.0" logger="slf4j" />
+	
+	
+	<!-- 关闭所有服务的启动时检查 -->
+<!-- 	<dubbo:consumer check="false" /> -->
+	<!-- 注册中心配置，使用multicast广播注册中心暴露服务地址    check:false 关闭注册中心启动时检查 -->
+	<dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.1.46:2181,192.168.1.54:2181,192.168.1.57:2181" />
+	<!-- <dubbo:registry id="zookeeper" protocol="zookeeper" address="192.168.22.81:2181" /> -->
+
+	<!-- 多注册中心配置，竖号分隔表示同时连接多个不同注册中心，同一注册中心的多个集群地址用逗号分隔 -->
+	<!-- <dubbo:registry address="10.20.141.150:9090|10.20.154.177:9010" /> -->
+
+	<!-- 用dubbo协议在20880端口暴露服务 -->
+	<dubbo:protocol name="dubbo" port="20880" />
+	<!-- <dubbo:protocol name="http" port="8063" server="servlet" /> -->
+	
+	<!-- 加class="com.yang.dubbo.demo.impl.HelloDubboServiceImpl"也可以,会自动注册RootBeanDefinition -->
+	<dubbo:service interface="com.yang.dubbo.hello.HelloService" ref="helloService" />
+	<bean id="helloService" class="com.yang.dubbo.hello.impl.HelloServiceImpl" />
+
+	
+	<!-- 分组 -->
+	<dubbo:service interface="com.yang.dubbo.group.GroupService" ref="stbService" group="stb" />
+	<bean id="stbService" class="com.yang.dubbo.group.impl.StbServiceImpl" />
+	
+	<dubbo:service interface="com.yang.dubbo.group.GroupService" ref="voipService" group="voip" />
+	<bean id="voipService" class="com.yang.dubbo.group.impl.VoipServiceImpl" />
+	
+	<!-- 缓存 -->
+	<dubbo:service interface="com.yang.dubbo.cache.CacheService" ref="cacheService" cache="lru" />
+	<bean id="cacheService" class="com.yang.dubbo.cache.impl.CacheServiceImpl" />
+	
+	<!-- 参数回调 -->
+	<bean id="callbackService" class="com.yang.dubbo.callback.impl.CallbackServiceImpl" />
+	<dubbo:service interface="com.yang.dubbo.callback.CallbackService" ref="callbackService">
+	    <dubbo:method name="callback">
+	        <dubbo:argument index="1" callback="true" />
+			<!-- 也可以通过指定类型的方式 -->
+	        <dubbo:argument type="com.yang.dubbo.callback.CallbackListener" callback="true" />
+	    </dubbo:method>
+	</dubbo:service>
+	
+	<!-- 事件通知 -->
+	<dubbo:service interface="com.yang.dubbo.notice.NoticeService" ref="noticeService" />
+	<bean id="noticeService" class="com.yang.dubbo.notice.impl.NoticeServiceImpl" />
+	
+	<!-- 本地存根 -->
+	<dubbo:service interface="com.yang.dubbo.stub.StubService" ref="stubService" stub="com.yang.dubbo.stub.impl.StubServiceStub" />
+	<bean id="stubService" class="com.yang.dubbo.stub.impl.StubServiceImpl" />
+	
+	<!-- 本地伪装 -->
+	<dubbo:service interface="com.yang.dubbo.mock.MockService" ref="mockService" mock="true" />
+	<bean id="mockService" class="com.yang.dubbo.mock.impl.MockServiceImpl" />
+	
+	<!-- <dubbo:service interface="com.yang.dubbo.api.ApiService" ref="apiService" mock="true" />
+	<bean id="apiService" class="com.yang.dubbo.api.impl.ApiServiceImpl" /> -->
+	
+<!-- 	<dubbo:monitor protocol="registry" /> -->
+	
+</beans>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:dubbo="http://code.alibabatech.com/schema/dubbo"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans
+        http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context 
+		http://www.springframework.org/schema/context/spring-context-3.0.xsd 
+        http://code.alibabatech.com/schema/dubbo
+        http://code.alibabatech.com/schema/dubbo/dubbo.xsd
+        ">
+
+
+	<!-- 扫描注解包路径，多个包用逗号分隔，不填pacakge表示扫描当前ApplicationContext中所有的类 -->
+	<dubbo:annotation package="com.yang.dubbo" />
+	
+	<!-- 对指定的包进行组件扫描 -->
+	<!-- 使用annotation 自动注册bean,并检查@Required,@Autowired的属性已被注入 -->
+	<context:component-scan base-package="com.yang" />
+
+	<!-- 消费方应用名，用于计算依赖关系，不是匹配条件，不要与提供方一样 -->
+	<dubbo:application name="yang-client" />
+
+	<!-- 使用multicast广播注册中心暴露发现服务地址 -->
+	<dubbo:registry  protocol="zookeeper" address="192.168.1.46:2181,192.168.1.54:2181,192.168.1.57:2181" />
+	<!-- <dubbo:registry protocol="zookeeper" address="192.168.22.81:2181" /> -->
+	
+	<!-- 关闭所有服务的启动时检查 -->
+	<dubbo:consumer check="false" />
+	
+	<dubbo:module name="yang" version="1.0.0" owner="yang" organization="yy-yang" />
+	
+	<!-- Hello Dubbo -->
+	<dubbo:reference id="helloService" interface="com.yang.dubbo.hello.HelloService" />
+	
+	
+	<dubbo:reference id="useHelloService" interface="com.yang.dubbo.hello.UseHelloService" />
+	
+	<!-- 多版本 -->
+	<dubbo:reference id="voipGroupService" interface="com.yang.dubbo.group.GroupService" group="voip" />
+	<dubbo:reference id="stbVoipGroupService" interface="com.yang.dubbo.group.GroupService" group="stb,voip" merger="true" />
+
+	<!-- 结果缓存 -->
+	<dubbo:reference id="cacheService" interface="com.yang.dubbo.cache.CacheService" />
+
+	<!-- 异步调用 -->
+	<dubbo:reference id="voipAysncService" interface="com.yang.dubbo.group.GroupService" group="voip" async="true" />
+	<dubbo:reference id="stbAysncService" interface="com.yang.dubbo.group.GroupService" group="stb" async="true" />
+	
+	<!-- 参数回调 -->
+	<dubbo:reference id="callbackService" interface="com.yang.dubbo.callback.CallbackService" />
+
+	<!-- 事件通知 -->
+<!-- 	<bean id ="nofify" class = "com.yang.dubbo.notice.impl.NofifyImpl" />
+	<dubbo:reference id="notice" interface="com.yang.dubbo.notice.NoticeService">
+	      <dubbo:method name="notice" onreturn="nofify.onReturn" onthrow="nofify.onThrow"/>
+	</dubbo:reference> -->
+	
+	<!-- 本地存根 -->
+	<dubbo:reference id="stubService" interface="com.yang.dubbo.stub.StubService" />
+	
+	<!-- 本地伪装 -->
+	<dubbo:reference id="mockService" interface="com.yang.dubbo.mock.MockService" />
+	<bean id="test" class="com.demo.springmvc.web.test.TestBean"/>
+
+	<dubbo:monitor protocol="registry" />
+</beans>
